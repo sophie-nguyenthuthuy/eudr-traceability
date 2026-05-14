@@ -29,14 +29,14 @@ Vietnam exports ~1.6M tonnes of coffee annually, the majority to the EU. Falling
                            ▼
                     ┌──────────────┐
                     │ Hansen GFC   │
-                    │ raster (S3)  │
+                    │ raster (MinIO)│
                     └──────────────┘
 ```
 
 - **API**: FastAPI, JWT (RS256) auth, role-based access (`producer`, `cooperative`, `exporter`, `auditor`, `admin`).
 - **DB**: PostgreSQL 16 + PostGIS 3.4. Migrations via Alembic. Geometries stored in EPSG:4326.
 - **Worker**: Celery on Redis. Handles deforestation checks and TRACES NT submission with retry/backoff.
-- **Object storage**: S3-compatible (MinIO locally) for ownership-proof scans and DDS payloads.
+- **Object storage**: MinIO (S3-compatible) for ownership-proof scans, DDS payloads, and the Hansen/JRC deforestation rasters. Same code path works against any other S3-compatible service in production.
 - **Observability**: structured JSON logs (structlog), OpenTelemetry exporters wired in `eudr.logging_config`.
 
 ## Quick start (local)

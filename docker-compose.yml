@@ -55,6 +55,7 @@ services:
       mc alias set local http://minio:9000 minioadmin minioadmin;
       mc mb -p local/eudr-documents || true;
       mc mb -p local/eudr-dds-payloads || true;
+      mc mb -p local/eudr-rasters || true;
       "
 
   api:

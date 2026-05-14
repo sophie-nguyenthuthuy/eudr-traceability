@@ -46,13 +46,14 @@ class Settings(BaseSettings):
     celery_broker_url: str = "redis://redis:6379/1"
     celery_result_backend: str = "redis://redis:6379/2"
 
-    # ---- S3 ----
-    s3_endpoint_url: str | None = None
-    s3_region: str = "us-east-1"
-    s3_access_key: str | None = None
-    s3_secret_key: str | None = None
-    s3_bucket_documents: str = "eudr-documents"
-    s3_bucket_dds: str = "eudr-dds-payloads"
+    # ---- MinIO (S3-compatible object storage) ----
+    minio_endpoint: str | None = None
+    minio_region: str = "us-east-1"
+    minio_access_key: str | None = None
+    minio_secret_key: str | None = None
+    minio_bucket_documents: str = "eudr-documents"
+    minio_bucket_dds: str = "eudr-dds-payloads"
+    minio_bucket_rasters: str = "eudr-rasters"
 
     # ---- EU TRACES NT ----
     traces_nt_env: Literal["sandbox", "production"] = "sandbox"
