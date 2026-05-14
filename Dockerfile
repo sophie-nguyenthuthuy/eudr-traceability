@@ -15,8 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
+# Install deps in a layer that's cached independently of the source.
+# We stub out src/eudr/__init__.py so `pip install -e .` can resolve the
+# package metadata; the real source is COPYed in below.
 COPY pyproject.toml ./
-RUN pip install --upgrade pip && \
+RUN mkdir -p src/eudr && touch src/eudr/__init__.py && \
+    pip install --upgrade pip && \
     pip install -e ".[dev]"
 
 COPY src ./src
