@@ -1,14 +1,17 @@
 services:
   postgres:
     image: postgis/postgis:16-3.4
+    # postgis/postgis is published only for linux/amd64; pin so we use the
+    # amd64 image deterministically (Rosetta will emulate on Apple Silicon).
+    platform: linux/amd64
     environment:
       POSTGRES_DB: eudr
       POSTGRES_USER: eudr
       POSTGRES_PASSWORD: eudr
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # No host port published — other containers reach it on the docker
+    # network as `postgres:5432`. Use `make psql` to connect from host.
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U eudr -d eudr"]
       interval: 5s
@@ -20,8 +23,7 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
-    ports:
-      - "6379:6379"
+    # No host port published — internal only.
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -36,9 +38,10 @@ services:
       MINIO_ROOT_PASSWORD: minioadmin
     volumes:
       - minio-data:/data
+    # Host ports shifted to 91xx to avoid clashing with other local stacks.
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9100:9000"
+      - "9101:9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 10s
@@ -76,8 +79,9 @@ services:
       - ./tests:/app/tests
       - ./scripts:/app/scripts
       - ./secrets:/run/secrets:ro
+    # Shifted to 8800 — port 8000 is commonly used by other services.
     ports:
-      - "8000:8000"
+      - "8800:8000"
     command: >
       uvicorn eudr.main:app --host 0.0.0.0 --port 8000 --reload
 

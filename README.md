@@ -49,7 +49,7 @@ make seed          # demo coop + 3 plots in Đắk Lắk + 1 lot
 make test          # pytest with testcontainers
 ```
 
-API docs at `http://localhost:8000/docs`. MinIO console at `http://localhost:9001`.
+API docs at `http://localhost:8800/docs`. MinIO console at `http://localhost:9101` (`minioadmin` / `minioadmin`). Postgres and Redis are not exposed to the host — use `make psql` for SQL access.
 
 ## EUDR compliance notes
 
