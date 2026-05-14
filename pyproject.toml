@@ -1,0 +1,86 @@
+[project]
+name = "eudr-traceability"
+version = "0.1.0"
+description = "EUDR traceability backend for Vietnamese coffee, rubber, and wood exports to the EU"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [{ name = "EUDR Traceability Contributors" }]
+
+dependencies = [
+    "fastapi==0.115.6",
+    "uvicorn[standard]==0.34.0",
+    "pydantic==2.10.4",
+    "pydantic-settings==2.7.1",
+    "sqlalchemy[asyncio]==2.0.36",
+    "asyncpg==0.30.0",
+    "alembic==1.14.0",
+    "geoalchemy2==0.16.0",
+    "shapely==2.0.6",
+    "pyproj==3.7.0",
+    "rasterio==1.4.3",
+    "celery[redis]==5.4.0",
+    "redis==5.2.1",
+    "httpx==0.28.1",
+    "python-jose[cryptography]==3.3.0",
+    "passlib[bcrypt]==1.7.4",
+    "python-multipart==0.0.20",
+    "boto3==1.35.92",
+    "structlog==24.5.0",
+    "opentelemetry-api==1.29.0",
+    "opentelemetry-sdk==1.29.0",
+    "opentelemetry-instrumentation-fastapi==0.50b0",
+    "opentelemetry-instrumentation-sqlalchemy==0.50b0",
+    "prometheus-client==0.21.1",
+    "tenacity==9.0.0",
+    "email-validator==2.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.4",
+    "pytest-asyncio==0.25.1",
+    "pytest-cov==6.0.0",
+    "httpx==0.28.1",
+    "testcontainers[postgres,redis]==4.9.0",
+    "ruff==0.8.4",
+    "mypy==1.14.0",
+    "types-passlib==1.7.7.20240819",
+    "types-python-jose==3.3.4.20240106",
+    "faker==33.1.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "S", "C4", "SIM", "RET", "ARG"]
+ignore = ["S101", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "ARG"]
+"alembic/*" = ["E501", "N999"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+exclude = ["alembic/versions"]
+
+[[tool.mypy.overrides]]
+module = ["geoalchemy2.*", "shapely.*", "rasterio.*", "celery.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --cov=eudr --cov-report=term-missing"
