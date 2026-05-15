@@ -24,37 +24,58 @@ def upgrade() -> None:
     op.execute("CREATE EXTENSION IF NOT EXISTS postgis")
     op.execute('CREATE EXTENSION IF NOT EXISTS "pgcrypto"')
 
+    # Declare each enum once. We pass create_type=False because we issue
+    # CREATE TYPE explicitly below via enum.create(...). Without this, every
+    # column that references the enum would re-issue the CREATE TYPE and
+    # the migration would crash on "type already exists".
     org_type = sa.Enum(
         "producer", "cooperative", "processor", "exporter", "auditor",
         name="organization_type",
+        create_type=False,
     )
     user_role = sa.Enum(
         "producer", "cooperative_officer", "exporter", "auditor", "admin",
         name="user_role",
+        create_type=False,
     )
-    commodity = sa.Enum("coffee", "rubber", "wood", name="commodity")
-    geolocation_type = sa.Enum("point", "polygon", name="geolocation_type")
+    commodity = sa.Enum(
+        "coffee", "rubber", "wood",
+        name="commodity",
+        create_type=False,
+    )
+    geolocation_type = sa.Enum(
+        "point", "polygon",
+        name="geolocation_type",
+        create_type=False,
+    )
     lot_status = sa.Enum(
         "draft", "sealed", "dds_pending", "dds_submitted", "shipped", "rejected",
         name="lot_status",
+        create_type=False,
     )
     custody_event_type = sa.Enum(
         "transfer", "transformation", "transport", "split", "merge", "inspection",
         name="custody_event_type",
+        create_type=False,
     )
     dds_status = sa.Enum(
         "draft", "ready", "submitted", "accepted", "rejected", "withdrawn",
         name="dds_status",
+        create_type=False,
     )
     deforestation_source = sa.Enum(
         "hansen_gfc", "jrc_tmf", "national_forest_map", "manual",
         name="deforestation_source",
+        create_type=False,
     )
+    bind = op.get_bind()
     for enum in (
         org_type, user_role, commodity, geolocation_type, lot_status,
         custody_event_type, dds_status, deforestation_source,
     ):
-        enum.create(op.get_bind(), checkfirst=True)
+        # Build a transient Enum with create_type=True for the CREATE TYPE
+        # call so we own the DDL exactly once.
+        sa.Enum(*enum.enums, name=enum.name).create(bind, checkfirst=True)
 
     op.create_table(
         "organizations",
