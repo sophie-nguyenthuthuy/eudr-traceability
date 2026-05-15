@@ -40,8 +40,12 @@ def test_parse_point_ok() -> None:
 
 
 def test_invalid_type_rejected() -> None:
+    # parse_geojson accepts any well-formed GeoJSON; the EUDR-specific
+    # rejection (Point/Polygon only) happens in classify_geometry, which is
+    # called from validate_for_eudr in the request path.
+    geom = parse_geojson({"type": "LineString", "coordinates": [[0, 0], [1, 1]]})
     with pytest.raises(ValidationError):
-        parse_geojson({"type": "LineString", "coordinates": [[0, 0], [1, 1]]})
+        classify_geometry(geom)
 
 
 def test_point_requires_declared_area() -> None:

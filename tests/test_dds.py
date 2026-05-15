@@ -95,7 +95,7 @@ async def test_build_dds_negligible(session, lot_ready_for_dds, admin_org) -> No
 
 
 async def test_non_negligible_requires_mitigation(session, lot_ready_for_dds, admin_org) -> None:
-    # Mark the plot as failing the cutoff check; build should error.
+    # build_risk_assessment is pure — exercise its classification logic first.
     payload = {
         "geolocations": [
             {
@@ -107,8 +107,15 @@ async def test_non_negligible_requires_mitigation(session, lot_ready_for_dds, ad
     assessment = build_risk_assessment(payload)
     assert assessment["classification"] == "non_negligible"
 
-    # And the create_dds path rejects when the plot is flagged non-compliant.
-    lot_ready_for_dds.compositions[0].harvest.plot.cutoff_compliant = False
+    # And the create_dds path rejects when the lot's plot is non-compliant.
+    # Avoid lazy-loading the lot → composition → harvest → plot chain (which
+    # would trigger async I/O outside a greenlet); fetch the plot directly.
+    from sqlalchemy import select
+
+    from eudr.models import Plot
+    plot = (await session.execute(select(Plot))).scalars().first()
+    assert plot is not None
+    plot.cutoff_compliant = False
     await session.commit()
 
     with pytest.raises(ConflictError):

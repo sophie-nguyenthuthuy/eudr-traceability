@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Body, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import func, select
 
 from eudr.deps import CurrentUserDep, PrincipalDep, SessionDep, require_role
@@ -92,19 +92,12 @@ async def create_plot(
     session: SessionDep,
     user: CurrentUserDep,
     body: PlotCreate,
-    declared_area_ha: Annotated[
-        float | None,
-        Body(
-            embed=True,
-            description="Required for Point geometries (holdings ≤ 4 ha).",
-        ),
-    ] = None,
 ) -> PlotOut:
     if user.role is UserRole.PRODUCER and body.producer_org_id != user.organization_id:
         raise ForbiddenError("producers can only register plots for their own organization")
 
     geom = parse_geojson(body.geometry)
-    geo_type, area_ha = validate_for_eudr(geom, declared_area_ha)
+    geo_type, area_ha = validate_for_eudr(geom, body.declared_area_ha)
 
     plot = Plot(
         producer_org_id=body.producer_org_id,

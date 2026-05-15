@@ -17,6 +17,7 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 from eudr.db import get_session
 from eudr.main import create_app
@@ -34,7 +35,12 @@ def database_url() -> str:
 
 @pytest_asyncio.fixture(scope="session")
 async def engine(database_url: str):
-    eng = create_async_engine(database_url, pool_pre_ping=True)
+    # NullPool: each test connection is opened fresh in the current event loop
+    # and closed after use. This avoids the classic asyncpg + pytest-asyncio
+    # "Future attached to a different loop" error caused by the session-scoped
+    # engine pooling connections opened in one loop and lent to tests running
+    # in a different loop.
+    eng = create_async_engine(database_url, poolclass=NullPool)
     async with eng.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield eng

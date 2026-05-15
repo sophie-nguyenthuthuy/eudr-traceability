@@ -16,6 +16,15 @@ class PlotCreate(BaseModel):
     external_ref: str | None = Field(default=None, max_length=128)
     commodity: Commodity
     geometry: GeoJSONGeometry
+    declared_area_ha: float | None = Field(
+        default=None,
+        gt=0,
+        description=(
+            "Required for Point geometries (EUDR Art. 9(1)(d) — holdings "
+            "≤ 4 ha may use a single point). Ignored for polygons, where "
+            "the area is computed from the geometry."
+        ),
+    )
     planted_year: int | None = Field(default=None, ge=1900, le=2100)
     ownership_proof_url: str | None = Field(default=None, max_length=1024)
     notes: str | None = Field(default=None, max_length=2048)
