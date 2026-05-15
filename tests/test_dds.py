@@ -31,16 +31,22 @@ async def lot_ready_for_dds(session, admin_org):
         producer_org_id=producer.id,
         commodity=Commodity.COFFEE,
         geolocation_type="polygon",
-        geometry=geom_to_db(parse_geojson({
-            "type": "Polygon",
-            "coordinates": [[
-                [108.0500, 12.6667],
-                [108.0510, 12.6667],
-                [108.0510, 12.6677],
-                [108.0500, 12.6677],
-                [108.0500, 12.6667],
-            ]],
-        })),
+        geometry=geom_to_db(
+            parse_geojson(
+                {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [108.0500, 12.6667],
+                            [108.0510, 12.6667],
+                            [108.0510, 12.6677],
+                            [108.0500, 12.6677],
+                            [108.0500, 12.6667],
+                        ]
+                    ],
+                }
+            )
+        ),
         area_ha=1.0,
         cutoff_compliant=True,
     )
@@ -113,6 +119,7 @@ async def test_non_negligible_requires_mitigation(session, lot_ready_for_dds, ad
     from sqlalchemy import select
 
     from eudr.models import Plot
+
     plot = (await session.execute(select(Plot))).scalars().first()
     assert plot is not None
     plot.cutoff_compliant = False

@@ -18,8 +18,8 @@ from sqlalchemy.orm import selectinload
 
 from eudr.errors import ConflictError, NotFoundError
 from eudr.models.custody import CustodyEvent
-from eudr.models.deforestation import DeforestationCheck
 from eudr.models.dds import DDSStatus, DueDiligenceStatement
+from eudr.models.deforestation import DeforestationCheck
 from eudr.models.lot import Lot, LotStatus
 from eudr.models.organization import Organization
 from eudr.models.plot import Plot
@@ -33,11 +33,7 @@ def _generate_reference() -> str:
 
 
 async def _load_lot(session: AsyncSession, lot_id: UUID) -> Lot:
-    stmt = (
-        select(Lot)
-        .options(selectinload(Lot.compositions))
-        .where(Lot.id == lot_id)
-    )
+    stmt = select(Lot).options(selectinload(Lot.compositions)).where(Lot.id == lot_id)
     lot = (await session.execute(stmt)).scalar_one_or_none()
     if lot is None:
         raise NotFoundError(f"lot {lot_id} not found")
@@ -60,7 +56,11 @@ async def _latest_check(session: AsyncSession, plot_id: UUID) -> DeforestationCh
     return (await session.execute(stmt)).scalar_one_or_none()
 
 
-async def build_payload(session: AsyncSession, lot_id: UUID, operator: Organization) -> dict[str, Any]:
+async def build_payload(
+    session: AsyncSession,
+    lot_id: UUID,
+    operator: Organization,
+) -> dict[str, Any]:
     lot = await _load_lot(session, lot_id)
     plots = await _plots_for_lot(session, lot)
 
@@ -109,7 +109,7 @@ async def build_payload(session: AsyncSession, lot_id: UUID, operator: Organizat
     )
     custody_events = list((await session.execute(custody_stmt)).scalars())
 
-    payload = {
+    return {
         "schema_version": DDS_SCHEMA_VERSION,
         "generated_at": datetime.now(UTC).isoformat(),
         "operator": {
@@ -142,7 +142,6 @@ async def build_payload(session: AsyncSession, lot_id: UUID, operator: Organizat
             for e in custody_events
         ],
     }
-    return payload
 
 
 def build_risk_assessment(payload: dict[str, Any]) -> dict[str, Any]:

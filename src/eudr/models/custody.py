@@ -14,7 +14,8 @@ from datetime import datetime
 
 from geoalchemy2 import Geometry
 from sqlalchemy import DateTime, ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from eudr.models.base import Base, pg_enum
@@ -33,9 +34,7 @@ class CustodyEventType(str, enum.Enum):
 
 class CustodyEvent(Base):
     __tablename__ = "custody_events"
-    __table_args__ = (
-        Index("custody_events_lot_occurred_at_idx", "lot_id", "occurred_at"),
-    )
+    __table_args__ = (Index("custody_events_lot_occurred_at_idx", "lot_id", "occurred_at"),)
 
     lot_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -74,9 +73,5 @@ class CustodyEvent(Base):
     )
 
     lot: Mapped[Lot] = relationship(lazy="joined")
-    from_org: Mapped[Organization | None] = relationship(
-        foreign_keys=[from_org_id], lazy="joined"
-    )
-    to_org: Mapped[Organization | None] = relationship(
-        foreign_keys=[to_org_id], lazy="joined"
-    )
+    from_org: Mapped[Organization | None] = relationship(foreign_keys=[from_org_id], lazy="joined")
+    to_org: Mapped[Organization | None] = relationship(foreign_keys=[to_org_id], lazy="joined")

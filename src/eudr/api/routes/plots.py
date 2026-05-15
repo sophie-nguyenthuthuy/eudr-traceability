@@ -58,13 +58,9 @@ async def list_plots(
     stmt = select(Plot)
     if producer_org_id is not None:
         stmt = stmt.where(Plot.producer_org_id == producer_org_id)
-    total = (
-        await session.execute(stmt.with_only_columns(func.count(Plot.id)))
-    ).scalar_one()
+    total = (await session.execute(stmt.with_only_columns(func.count(Plot.id)))).scalar_one()
     rows = (
-        await session.execute(
-            stmt.order_by(Plot.created_at.desc()).limit(limit).offset(offset)
-        )
+        await session.execute(stmt.order_by(Plot.created_at.desc()).limit(limit).offset(offset))
     ).scalars()
     return Page(
         items=[_to_out(r) for r in rows],
@@ -117,9 +113,7 @@ async def create_plot(
 
 @router.get("/{plot_id}", response_model=PlotOut)
 async def get_plot(plot_id: UUID, session: SessionDep, _: PrincipalDep) -> PlotOut:
-    plot = (
-        await session.execute(select(Plot).where(Plot.id == plot_id))
-    ).scalar_one_or_none()
+    plot = (await session.execute(select(Plot).where(Plot.id == plot_id))).scalar_one_or_none()
     if plot is None:
         raise NotFoundError(f"plot {plot_id} not found")
     return _to_out(plot)
@@ -135,9 +129,7 @@ async def run_deforestation_check(
     session: SessionDep,
     _: PrincipalDep,
 ) -> DeforestationCheckOut:
-    plot = (
-        await session.execute(select(Plot).where(Plot.id == plot_id))
-    ).scalar_one_or_none()
+    plot = (await session.execute(select(Plot).where(Plot.id == plot_id))).scalar_one_or_none()
     if plot is None:
         raise NotFoundError(f"plot {plot_id} not found")
 

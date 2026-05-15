@@ -22,7 +22,9 @@ from eudr.services.geo import geom_to_db, parse_geojson
 @pytest.fixture
 async def seeded_lot(session, admin_org, admin_user):
     cooperative = Organization(
-        name="Coop", type=OrganizationType.COOPERATIVE, country_code="VN",
+        name="Coop",
+        type=OrganizationType.COOPERATIVE,
+        country_code="VN",
     )
     session.add(cooperative)
     await session.flush()
@@ -31,16 +33,22 @@ async def seeded_lot(session, admin_org, admin_user):
         producer_org_id=cooperative.id,
         commodity=Commodity.COFFEE,
         geolocation_type="polygon",
-        geometry=geom_to_db(parse_geojson({
-            "type": "Polygon",
-            "coordinates": [[
-                [108.0500, 12.6667],
-                [108.0510, 12.6667],
-                [108.0510, 12.6677],
-                [108.0500, 12.6677],
-                [108.0500, 12.6667],
-            ]],
-        })),
+        geometry=geom_to_db(
+            parse_geojson(
+                {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [108.0500, 12.6667],
+                            [108.0510, 12.6667],
+                            [108.0510, 12.6677],
+                            [108.0500, 12.6677],
+                            [108.0500, 12.6667],
+                        ]
+                    ],
+                }
+            )
+        ),
         area_ha=1.2,
     )
     session.add(plot)

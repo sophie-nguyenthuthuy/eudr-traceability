@@ -26,9 +26,9 @@ def _stub_settings(client: TracesNTClient) -> None:
     )
 
 
-def _build_transport(*, token_status: int = 200, dds_status: int = 200) -> tuple[
-    httpx.MockTransport, list[httpx.Request]
-]:
+def _build_transport(
+    *, token_status: int = 200, dds_status: int = 200
+) -> tuple[httpx.MockTransport, list[httpx.Request]]:
     captured: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:

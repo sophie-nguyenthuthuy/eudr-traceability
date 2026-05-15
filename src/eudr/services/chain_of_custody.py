@@ -14,6 +14,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
+from geoalchemy2.shape import to_shape
 from shapely.geometry import mapping
 from shapely.geometry.base import BaseGeometry
 from sqlalchemy import select
@@ -99,9 +100,13 @@ async def record_event(
     )
     session.add(event)
 
-    if event_type in {CustodyEventType.TRANSFER, CustodyEventType.SPLIT, CustodyEventType.MERGE}:
-        if to_org_id is not None:
-            lot.current_holder_org_id = to_org_id
+    holder_changing_events = {
+        CustodyEventType.TRANSFER,
+        CustodyEventType.SPLIT,
+        CustodyEventType.MERGE,
+    }
+    if event_type in holder_changing_events and to_org_id is not None:
+        lot.current_holder_org_id = to_org_id
 
     await session.flush()
     return event
@@ -123,9 +128,7 @@ async def verify_chain(session: AsyncSession, lot_id: UUID) -> tuple[bool, int]:
             "from_org_id": str(ev.from_org_id) if ev.from_org_id else None,
             "to_org_id": str(ev.to_org_id) if ev.to_org_id else None,
             "occurred_at": ev.occurred_at.isoformat(),
-            "location": None
-            if ev.location is None
-            else mapping(__import__("geoalchemy2.shape", fromlist=["to_shape"]).to_shape(ev.location)),
+            "location": (None if ev.location is None else mapping(to_shape(ev.location))),
             "document_url": ev.document_url,
             "payload": ev.payload,
         }

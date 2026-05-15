@@ -7,7 +7,8 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from eudr.models.base import Base, pg_enum
@@ -26,9 +27,7 @@ class DDSStatus(str, enum.Enum):
 
 class DueDiligenceStatement(Base):
     __tablename__ = "due_diligence_statements"
-    __table_args__ = (
-        UniqueConstraint("dds_reference", name="dds_reference_unique"),
-    )
+    __table_args__ = (UniqueConstraint("dds_reference", name="dds_reference_unique"),)
 
     lot_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

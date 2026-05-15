@@ -59,7 +59,7 @@ class Lot(Base):
     )
 
     current_holder: Mapped[Organization] = relationship(lazy="joined")
-    compositions: Mapped[list["LotComposition"]] = relationship(
+    compositions: Mapped[list[LotComposition]] = relationship(
         back_populates="lot",
         cascade="all, delete-orphan",
         lazy="selectin",

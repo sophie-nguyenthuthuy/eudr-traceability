@@ -28,6 +28,7 @@ def pg_enum(py_cls: type[E], name: str) -> Enum:
         values_callable=lambda cls: [m.value for m in cls],
     )
 
+
 UUIDPK = Annotated[
     uuid.UUID,
     mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),

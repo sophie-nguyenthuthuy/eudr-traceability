@@ -30,9 +30,7 @@ async def list_harvests(
     stmt = select(Harvest)
     if plot_id is not None:
         stmt = stmt.where(Harvest.plot_id == plot_id)
-    total = (
-        await session.execute(stmt.with_only_columns(func.count(Harvest.id)))
-    ).scalar_one()
+    total = (await session.execute(stmt.with_only_columns(func.count(Harvest.id)))).scalar_one()
     rows = (
         await session.execute(
             stmt.order_by(Harvest.harvest_date.desc()).limit(limit).offset(offset)
@@ -61,9 +59,7 @@ async def list_harvests(
     ],
 )
 async def create_harvest(body: HarvestCreate, session: SessionDep) -> HarvestOut:
-    plot = (
-        await session.execute(select(Plot).where(Plot.id == body.plot_id))
-    ).scalar_one_or_none()
+    plot = (await session.execute(select(Plot).where(Plot.id == body.plot_id))).scalar_one_or_none()
     if plot is None:
         raise NotFoundError(f"plot {body.plot_id} not found")
     harvest = Harvest(**body.model_dump())

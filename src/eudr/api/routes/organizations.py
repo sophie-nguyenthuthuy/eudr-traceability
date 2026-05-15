@@ -28,7 +28,10 @@ async def list_organizations(
     total = (await session.execute(select(func.count(Organization.id)))).scalar_one()
     rows = (
         await session.execute(
-            select(Organization).order_by(Organization.created_at.desc()).limit(limit).offset(offset)
+            select(Organization)
+            .order_by(Organization.created_at.desc())
+            .limit(limit)
+            .offset(offset)
         )
     ).scalars()
     return Page(
@@ -53,9 +56,7 @@ async def create_organization(body: OrganizationCreate, session: SessionDep) -> 
 
 
 @router.get("/{org_id}", response_model=OrganizationOut)
-async def get_organization(
-    org_id: UUID, session: SessionDep, _: PrincipalDep
-) -> OrganizationOut:
+async def get_organization(org_id: UUID, session: SessionDep, _: PrincipalDep) -> OrganizationOut:
     org = (
         await session.execute(select(Organization).where(Organization.id == org_id))
     ).scalar_one_or_none()

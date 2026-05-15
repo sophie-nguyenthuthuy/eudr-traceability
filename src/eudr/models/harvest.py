@@ -15,9 +15,7 @@ from eudr.models.plot import Plot
 
 class Harvest(Base):
     __tablename__ = "harvests"
-    __table_args__ = (
-        CheckConstraint("quantity_kg > 0", name="harvests_quantity_positive"),
-    )
+    __table_args__ = (CheckConstraint("quantity_kg > 0", name="harvests_quantity_positive"),)
 
     plot_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

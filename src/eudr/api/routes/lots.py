@@ -88,9 +88,7 @@ async def create_lot(body: LotCreate, session: SessionDep) -> LotOut:
     # and that we are not over-drawing a harvest's available quantity.
     harvest_ids = [c.harvest_id for c in body.compositions]
     harvests = list(
-        (
-            await session.execute(select(Harvest).where(Harvest.id.in_(harvest_ids)))
-        ).scalars(),
+        (await session.execute(select(Harvest).where(Harvest.id.in_(harvest_ids)))).scalars(),
     )
     if len(harvests) != len(harvest_ids):
         missing = set(harvest_ids) - {h.id for h in harvests}
@@ -116,8 +114,7 @@ async def create_lot(body: LotCreate, session: SessionDep) -> LotOut:
         available = Decimal(h.quantity_kg) - allocated
         if Decimal(str(comp.quantity_kg)) > available:
             raise ConflictError(
-                f"harvest {h.id} has {available} kg available, "
-                f"requested {comp.quantity_kg} kg",
+                f"harvest {h.id} has {available} kg available, " f"requested {comp.quantity_kg} kg",
             )
 
     total = sum(Decimal(str(c.quantity_kg)) for c in body.compositions)

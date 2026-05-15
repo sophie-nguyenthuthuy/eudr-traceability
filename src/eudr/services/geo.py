@@ -60,9 +60,9 @@ def compute_area_ha(geom: BaseGeometry) -> float:
     return float(projected.area) / 10_000.0  # m² → ha
 
 
-def validate_for_eudr(geom: BaseGeometry, declared_area_ha: float | None) -> tuple[
-    GeolocationType, float
-]:
+def validate_for_eudr(
+    geom: BaseGeometry, declared_area_ha: float | None
+) -> tuple[GeolocationType, float]:
     """Returns ``(geolocation_type, area_ha)`` enforcing EUDR Art. 9(1)(d).
 
     For points the producer must declare a holding area ≤ 4 ha. For polygons

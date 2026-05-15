@@ -47,7 +47,10 @@ async def pending_dds(session, admin_org):
         producer_org_id=admin_org.id,
         commodity=Commodity.COFFEE,
         geolocation_type="polygon",
-        geometry="SRID=4326;POLYGON((108.05 12.66, 108.06 12.66, 108.06 12.67, 108.05 12.67, 108.05 12.66))",
+        geometry=(
+            "SRID=4326;POLYGON((108.05 12.66, 108.06 12.66, "
+            "108.06 12.67, 108.05 12.67, 108.05 12.66))"
+        ),
         area_ha=1.0,
         cutoff_compliant=True,
     )
@@ -55,7 +58,9 @@ async def pending_dds(session, admin_org):
     await session.flush()
 
     harvest = Harvest(
-        plot_id=plot.id, quantity_kg=1000, harvest_date=date(2025, 11, 1),
+        plot_id=plot.id,
+        quantity_kg=1000,
+        harvest_date=date(2025, 11, 1),
     )
     session.add(harvest)
     await session.flush()
@@ -85,7 +90,11 @@ async def pending_dds(session, admin_org):
     return dds
 
 
-async def test_submit_happy_path_marks_dds_submitted(monkeypatch, patch_worker_session, pending_dds):
+async def test_submit_happy_path_marks_dds_submitted(
+    monkeypatch,
+    patch_worker_session,
+    pending_dds,
+):
     """A successful TRACES NT submission flips the DDS to SUBMITTED and
     stores the reference + verification number returned by the EU."""
 
@@ -121,13 +130,15 @@ async def test_submit_happy_path_marks_dds_submitted(monkeypatch, patch_worker_s
         assert dds.submitted_at is not None
         assert dds.submitted_at.tzinfo is not None
         # Lot tracked along
-        lot = (
-            await s.execute(select(Lot).where(Lot.id == dds.lot_id))
-        ).scalar_one()
+        lot = (await s.execute(select(Lot).where(Lot.id == dds.lot_id))).scalar_one()
         assert lot.status is LotStatus.DDS_SUBMITTED
 
 
-async def test_submit_traces_nt_error_marks_rejected(monkeypatch, patch_worker_session, pending_dds):
+async def test_submit_traces_nt_error_marks_rejected(
+    monkeypatch,
+    patch_worker_session,
+    pending_dds,
+):
     """A 4xx from TRACES NT (e.g. bad payload) marks the DDS REJECTED with
     a recorded reason and bubbles the exception so Celery retries kick in
     for the auto-retried (5xx) class only."""

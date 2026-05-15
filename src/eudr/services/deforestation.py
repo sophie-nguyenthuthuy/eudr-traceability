@@ -32,7 +32,7 @@ class DeforestationResult:
     raw: dict
 
 
-def _stub_overlap(geom: BaseGeometry) -> float:
+def _stub_overlap(_geom: BaseGeometry) -> float:
     """Deterministic zero overlap for stubbed local/CI runs.
 
     A real implementation calls ``rasterio.mask.mask`` against the GFC
