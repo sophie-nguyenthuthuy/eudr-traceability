@@ -25,6 +25,10 @@ dependencies = [
     "httpx==0.28.1",
     "python-jose[cryptography]==3.3.0",
     "passlib[bcrypt]==1.7.4",
+    # passlib 1.7.4 runs a self-test on bcrypt init that crashes against
+    # bcrypt >= 4.1 ("password cannot be longer than 72 bytes"). Pin until
+    # passlib ships a 1.8 release or we migrate off it.
+    "bcrypt==4.0.1",
     "python-multipart==0.0.20",
     "boto3==1.35.92",
     "structlog==24.4.0",
