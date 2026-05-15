@@ -78,7 +78,7 @@ DEMO_PLOTS = [
 async def _seed() -> None:
     async with SessionLocal() as session:
         existing = (
-            await session.execute(select(User).where(User.email == "admin@eudr.local"))
+            await session.execute(select(User).where(User.email == "admin@eudr.example.com"))
         ).scalar_one_or_none()
         if existing:
             log.info("seed.skip", reason="already_seeded")
@@ -103,7 +103,7 @@ async def _seed() -> None:
         await session.flush()
 
         admin = User(
-            email="admin@eudr.local",
+            email="admin@eudr.example.com",
             password_hash=hash_password("changeme1234"),
             full_name="Demo Admin",
             organization_id=exporter.id,
@@ -173,7 +173,7 @@ async def _seed() -> None:
             cooperative_id=str(coop.id),
             exporter_id=str(exporter.id),
             lot_id=str(lot.id),
-            login="admin@eudr.local / changeme1234",
+            login="admin@eudr.example.com / changeme1234",
         )
 
 

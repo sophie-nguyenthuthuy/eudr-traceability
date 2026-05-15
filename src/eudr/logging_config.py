@@ -18,7 +18,10 @@ def configure_logging() -> None:
     shared_processors: list = [
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
-        structlog.stdlib.add_logger_name,
+        # NB: structlog.stdlib.add_logger_name requires a logger with a
+        # `.name` attribute (i.e. a stdlib logging.Logger). We use
+        # PrintLoggerFactory below, which doesn't have one — so we add the
+        # logger name ourselves via the bound context when needed.
         timestamper,
         structlog.processors.StackInfoRenderer(),
     ]
