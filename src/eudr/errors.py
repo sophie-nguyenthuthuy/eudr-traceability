@@ -48,7 +48,17 @@ class DeforestationRiskError(EUDRError):
 
 
 class TracesNTError(EUDRError):
-    """EU TRACES NT submission failed."""
+    """EU TRACES NT submission failed (permanent — typically a 4xx).
+
+    Raised when TRACES NT actively rejects the DDS. Not retried — fix the
+    payload and resubmit.
+    """
 
     status_code = 502
     code = "traces_nt_unavailable"
+
+
+class TracesNTRetryableError(TracesNTError):
+    """Transient TRACES NT failure (5xx or transport error) — safe to retry."""
+
+    code = "traces_nt_retryable"

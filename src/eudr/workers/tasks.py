@@ -10,7 +10,7 @@ from uuid import UUID
 from sqlalchemy import select
 
 from eudr.db import SessionLocal
-from eudr.errors import TracesNTError
+from eudr.errors import TracesNTError, TracesNTRetryableError
 from eudr.logging_config import configure_logging, get_logger
 from eudr.models.dds import DDSStatus, DueDiligenceStatement
 from eudr.models.lot import LotStatus
@@ -45,7 +45,13 @@ async def _submit(dds_id: UUID) -> dict[str, Any]:
         try:
             client = TracesNTClient()
             resp = await client.submit(dds.payload)
+        except TracesNTRetryableError:
+            # Transient — leave the DDS in its current status so Celery's
+            # autoretry policy can take another swing.
+            log.warning("dds.submit.transient_failure", dds_id=str(dds_id))
+            raise
         except TracesNTError as e:
+            # Permanent rejection — record the reason and stop retrying.
             dds.status = DDSStatus.REJECTED
             dds.rejected_at = datetime.now(UTC)
             dds.rejection_reason = str(e)
@@ -70,7 +76,10 @@ async def _submit(dds_id: UUID) -> dict[str, Any]:
 @celery_app.task(
     bind=True,
     name="eudr.workers.tasks.submit_dds_task",
-    autoretry_for=(TracesNTError,),
+    # Retry only transient TRACES NT failures. Permanent rejections
+    # (plain TracesNTError, 4xx) are surfaced and the task fails — the
+    # operator must fix the DDS payload and resubmit explicitly.
+    autoretry_for=(TracesNTRetryableError,),
     retry_backoff=True,
     retry_backoff_max=300,
     retry_jitter=True,

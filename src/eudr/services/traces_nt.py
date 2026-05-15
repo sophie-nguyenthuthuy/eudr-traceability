@@ -23,7 +23,7 @@ from tenacity import (
 )
 
 from eudr.config import get_settings
-from eudr.errors import TracesNTError
+from eudr.errors import TracesNTError, TracesNTRetryableError
 from eudr.logging_config import get_logger
 
 log = get_logger(__name__)
@@ -69,7 +69,10 @@ class TracesNTClient:
             return str(resp.json()["access_token"])
 
     @retry(
-        retry=retry_if_exception_type((httpx.TransportError, TracesNTError)),
+        # Only retry transient failures — 5xx upstream blips and network
+        # errors. 4xx (TracesNTError, not Retryable) is a permanent rejection;
+        # bubble it up without burning the retry budget.
+        retry=retry_if_exception_type((httpx.TransportError, TracesNTRetryableError)),
         stop=stop_after_attempt(5),
         wait=wait_exponential(multiplier=1, min=2, max=30),
         reraise=True,
@@ -83,9 +86,9 @@ class TracesNTClient:
                 json=payload,
             )
             if resp.status_code >= 500:
-                raise TracesNTError(f"upstream 5xx: {resp.status_code}")
+                raise TracesNTRetryableError(f"upstream 5xx: {resp.status_code}")
             if resp.status_code >= 400:
-                # 4xx is a client error, no retry; surface to caller.
+                # 4xx is a permanent client error; surface to caller without retry.
                 log.warning(
                     "traces_nt.submit.rejected",
                     status=resp.status_code,
