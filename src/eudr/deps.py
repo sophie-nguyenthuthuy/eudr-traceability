@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Annotated
 from uuid import UUID
@@ -52,7 +53,7 @@ async def get_current_user(
     return user
 
 
-def require_role(*allowed: UserRole):
+def require_role(*allowed: UserRole) -> Callable[..., Awaitable[Principal]]:
     """Dependency factory: enforces that the principal has one of the given roles."""
 
     async def _check(

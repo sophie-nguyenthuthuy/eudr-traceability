@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -20,7 +21,7 @@ log = get_logger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # noqa: ARG001
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:  # noqa: ARG001
     configure_logging()
     settings = get_settings()
     log.info("app.starting", env=settings.app_env, version=__version__)

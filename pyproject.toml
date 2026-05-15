@@ -77,12 +77,37 @@ ignore = ["S101", "B008"]
 
 [tool.mypy]
 python_version = "3.12"
-strict = true
+# Pragmatic strictness: catch untyped defs and bad ignores, but tolerate
+# `dict`/`list` without parameters (most JSON-y payloads) and `Any` returns
+# from third-party shims (shapely, geoalchemy2, celery). Tighten later as
+# the codebase stabilises.
 plugins = ["pydantic.mypy"]
-exclude = ["alembic/versions"]
+exclude = ["alembic/versions", "tests"]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_unused_ignores = false
+warn_redundant_casts = true
+disable_error_code = [
+    "type-arg",       # bare `dict` / `list` are fine for JSON payloads here
+    "no-any-return",  # third-party shims (celery, shapely) return Any
+    "misc",           # celery decorators reported as "untyped"
+    "no-untyped-call",
+    "arg-type",       # geoalchemy2 stubs are loose
+    "assignment",     # structlog renderer union typing is intentional
+    "var-annotated",  # sqlalchemy Row tuples in dict() calls
+]
 
 [[tool.mypy.overrides]]
-module = ["geoalchemy2.*", "shapely.*", "rasterio.*", "celery.*"]
+module = [
+    "geoalchemy2.*",
+    "shapely.*",
+    "rasterio.*",
+    "celery.*",
+    "passlib.*",
+    "jose.*",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

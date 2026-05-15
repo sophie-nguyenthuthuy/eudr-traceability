@@ -22,7 +22,7 @@ configure_logging()
 log = get_logger(__name__)
 
 
-def _run(coro):
+def _run(coro: Any) -> Any:
     """Run an async coroutine from a sync Celery worker."""
     loop = asyncio.new_event_loop()
     try:
@@ -85,7 +85,7 @@ async def _submit(dds_id: UUID) -> dict[str, Any]:
     retry_jitter=True,
     max_retries=6,
 )
-def submit_dds_task(self, dds_id: str) -> dict[str, Any]:  # noqa: ARG001
+def submit_dds_task(self: Any, dds_id: str) -> dict[str, Any]:  # noqa: ARG001
     return _run(_submit(UUID(dds_id)))
 
 

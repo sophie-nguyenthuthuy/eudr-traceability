@@ -98,5 +98,6 @@ def geom_from_db(value: Any) -> dict[str, Any] | None:
     return mapping(to_shape(value))
 
 
-def geom_to_db(geom: BaseGeometry):
+def geom_to_db(geom: BaseGeometry) -> Any:
+    """Encode a shapely geometry as a GeoAlchemy2 WKBElement (the column type)."""
     return from_shape(geom, srid=4326)
