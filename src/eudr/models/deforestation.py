@@ -6,11 +6,11 @@ import enum
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, Enum, ForeignKey, Numeric, String
+from sqlalchemy import Date, DateTime, ForeignKey, Numeric, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from eudr.models.base import Base
+from eudr.models.base import Base, pg_enum
 from eudr.models.plot import Plot
 
 
@@ -31,7 +31,7 @@ class DeforestationCheck(Base):
         index=True,
     )
     source: Mapped[DeforestationSource] = mapped_column(
-        Enum(DeforestationSource, name="deforestation_source"),
+        pg_enum(DeforestationSource, "deforestation_source"),
         nullable=False,
     )
     cutoff_date: Mapped[date] = mapped_column(Date, nullable=False)

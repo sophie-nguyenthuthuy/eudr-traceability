@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import enum
 
-from sqlalchemy import Enum, String
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from eudr.models.base import Base
+from eudr.models.base import Base, pg_enum
 
 
 class OrganizationType(str, enum.Enum):
@@ -23,7 +23,7 @@ class Organization(Base):
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     type: Mapped[OrganizationType] = mapped_column(
-        Enum(OrganizationType, name="organization_type"),
+        pg_enum(OrganizationType, "organization_type"),
         nullable=False,
         index=True,
     )

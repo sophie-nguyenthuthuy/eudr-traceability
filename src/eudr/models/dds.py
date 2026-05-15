@@ -6,11 +6,11 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from eudr.models.base import Base
+from eudr.models.base import Base, pg_enum
 from eudr.models.lot import Lot
 from eudr.models.organization import Organization
 
@@ -44,7 +44,7 @@ class DueDiligenceStatement(Base):
     )
     dds_reference: Mapped[str] = mapped_column(String(64), nullable=False)
     status: Mapped[DDSStatus] = mapped_column(
-        Enum(DDSStatus, name="dds_status"),
+        pg_enum(DDSStatus, "dds_status"),
         nullable=False,
         default=DDSStatus.DRAFT,
         index=True,

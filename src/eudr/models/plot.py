@@ -15,7 +15,6 @@ from geoalchemy2 import Geometry
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
-    Enum,
     ForeignKey,
     Index,
     Numeric,
@@ -25,7 +24,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from eudr.models.base import Base
+from eudr.models.base import Base, pg_enum
 from eudr.models.organization import Organization
 
 
@@ -59,12 +58,12 @@ class Plot(Base):
     )
     external_ref: Mapped[str | None] = mapped_column(String(128), index=True)
     commodity: Mapped[Commodity] = mapped_column(
-        Enum(Commodity, name="commodity"),
+        pg_enum(Commodity, "commodity"),
         nullable=False,
         index=True,
     )
     geolocation_type: Mapped[GeolocationType] = mapped_column(
-        Enum(GeolocationType, name="geolocation_type"),
+        pg_enum(GeolocationType, "geolocation_type"),
         nullable=False,
     )
     geometry: Mapped[object] = mapped_column(

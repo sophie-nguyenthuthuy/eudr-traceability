@@ -13,11 +13,11 @@ import uuid
 from datetime import datetime
 
 from geoalchemy2 import Geometry
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, String
+from sqlalchemy import DateTime, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from eudr.models.base import Base
+from eudr.models.base import Base, pg_enum
 from eudr.models.lot import Lot
 from eudr.models.organization import Organization
 
@@ -44,7 +44,7 @@ class CustodyEvent(Base):
         index=True,
     )
     event_type: Mapped[CustodyEventType] = mapped_column(
-        Enum(CustodyEventType, name="custody_event_type"),
+        pg_enum(CustodyEventType, "custody_event_type"),
         nullable=False,
     )
     from_org_id: Mapped[uuid.UUID | None] = mapped_column(

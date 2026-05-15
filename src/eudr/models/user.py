@@ -6,11 +6,11 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from eudr.models.base import Base
+from eudr.models.base import Base, pg_enum
 from eudr.models.organization import Organization
 
 
@@ -35,7 +35,7 @@ class User(Base):
         index=True,
     )
     role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole, name="user_role"),
+        pg_enum(UserRole, "user_role"),
         nullable=False,
     )
     disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

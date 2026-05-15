@@ -7,7 +7,6 @@ import uuid
 
 from sqlalchemy import (
     CheckConstraint,
-    Enum,
     ForeignKey,
     Numeric,
     String,
@@ -16,7 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from eudr.models.base import Base
+from eudr.models.base import Base, pg_enum
 from eudr.models.harvest import Harvest
 from eudr.models.organization import Organization
 from eudr.models.plot import Commodity
@@ -40,14 +39,14 @@ class Lot(Base):
 
     lot_code: Mapped[str] = mapped_column(String(64), nullable=False)
     commodity: Mapped[Commodity] = mapped_column(
-        Enum(Commodity, name="commodity"),
+        pg_enum(Commodity, "commodity"),
         nullable=False,
         index=True,
     )
     hs_code: Mapped[str] = mapped_column(String(10), nullable=False)
     total_quantity_kg: Mapped[float] = mapped_column(Numeric(14, 3), nullable=False)
     status: Mapped[LotStatus] = mapped_column(
-        Enum(LotStatus, name="lot_status"),
+        pg_enum(LotStatus, "lot_status"),
         nullable=False,
         default=LotStatus.DRAFT,
         index=True,
